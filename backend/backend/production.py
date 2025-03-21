@@ -3,7 +3,7 @@ from backend.settings import *
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "https://skillhub-api-9mkx.onrender.com",
+    "skillhub-api-9mkx.onrender.com",
 ]
 
 # Cors Config
