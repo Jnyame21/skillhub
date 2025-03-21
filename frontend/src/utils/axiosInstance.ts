@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { useUserAuthStore } from "../stores/userAuthStore";
 
 const baseURL = import.meta.env.MODE === 'production'
-  ? "https://skillhub_api.onrender.com" // Production base URL
+  ? "https://skillhub-api-9mkx.onrender.com" // Production base URL
   : "http://localhost:8000"; // Development base URL
 
 export const defaultAxiosInstance = axios.create({

@@ -37,7 +37,7 @@ export const useElementsStore = defineStore('elementsStore', {
     getters: {
         getBaseUrl: ()=>{
             if (import.meta.env.MODE=== 'production'){
-              return "https://skillhub_api.onrender.com"
+              return "https://skillhub-api-9mkx.onrender.com"
             }
             else{
               return 'http://localhost:8000'

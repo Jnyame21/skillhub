@@ -3,12 +3,12 @@ from backend.settings import *
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'skillhub_api.onrender.com',
+    "https://skillhub-api-9mkx.onrender.com",
 ]
 
 # Cors Config
 CORS_ALLOWED_ORIGINS = [
-    "https://skillhub.onrender.com",
+    "https://skillhub-qgfd.onrender.com",
 ]
 
 # Pusher

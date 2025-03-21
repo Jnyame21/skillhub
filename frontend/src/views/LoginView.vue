@@ -265,7 +265,7 @@ const closeOverlay = (element: string) => {
   justify-content: center !important;
   align-items: center !important;
   background-size: cover !important;
-  background-image: url('app_background_img.jpg') !important;
+  background-image: url('/app_background_img.jpg') !important;
   background-position: center !important;
   flex-grow: 1 !important;
 }
