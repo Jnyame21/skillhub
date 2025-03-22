@@ -1,5 +1,6 @@
 # Byte-compiled / cached files
 __pycache__/
+setup_dev.cmd
 
 # Django-specific files
 *.log
