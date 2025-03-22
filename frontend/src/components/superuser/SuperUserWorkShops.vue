@@ -44,26 +44,12 @@ const initializePusherChannels = ()=>{
         if (studentItemIndex === -1){
           userAuthStore.superUserData.workshops[workShopIndex.value].students.unshift(data)
         }
-        // const workshopItemIndex = userAuthStore.superUserData.workshops.findIndex(item=> item.id === workshopId)
-        // if (workshopItemIndex !== -1){
-        //   const studentItemIndex = userAuthStore.superUserData.workshops[workshopItemIndex].students.findIndex(item=> item.id === data.id)
-        //   if (studentItemIndex === -1){
-        //     userAuthStore.superUserData.workshops[workshopItemIndex].students.unshift(data)
-        //   }
-        // }
       })
       channel.bind('cancel_registration', (data: number)=>{
         const studentItemIndex = userAuthStore.superUserData.workshops[workShopIndex.value].students.findIndex(item=> item.id === data)
         if (studentItemIndex !== -1){
           userAuthStore.superUserData.workshops[workShopIndex.value].students.splice(studentItemIndex, 1)
         }
-        // const workshopItemIndex = userAuthStore.superUserData.workshops.findIndex(item=> item.id === workshopId)
-        // if (workshopItemIndex !== -1){
-        //   const studentItemIndex = userAuthStore.superUserData.workshops[workshopItemIndex].students.findIndex(item=> item.id === data)
-        //   if (studentItemIndex !== -1){
-        //     userAuthStore.superUserData.workshops[workshopItemIndex].students.splice(studentItemIndex, 1)
-        //   }
-        // }
       })
     }
   }
@@ -75,21 +61,7 @@ const get_missed_work_shops_registrations = async()=>{
     formData.append('type', 'fetchMissedWorkShopRegistrations')
     const response = await axiosInstance.post('superuser/data', formData)
     const data:SuperUserWorkShop[] = response.data
-    data.forEach(item=>{
-      item.students.forEach(student=>{
-        const existingStudentIndex = userAuthStore.superUserData.workshops[workShopIndex.value].students.findIndex(studentItem=> studentItem.id === student.id)
-        if (existingStudentIndex === -1){
-          userAuthStore.superUserData.workshops[workShopIndex.value].students.unshift(student)
-        }
-        // const workshopItemIndex = userAuthStore.superUserData.workshops.findIndex(workshopItem=> workshopItem.id === workshopId)
-        // if (workshopItemIndex !== -1){
-        //   const existingStudentIndex = userAuthStore.superUserData.workshops[workshopItemIndex].students.findIndex(studentItem=> studentItem.id === student.id)
-        //   if (existingStudentIndex === -1){
-        //     userAuthStore.superUserData.workshops[workshopItemIndex].students.unshift(student)
-        //   }
-        // }
-      })
-    })
+    userAuthStore.superUserData.workshops = data
   }
   catch{
     return Promise.reject()
@@ -97,7 +69,7 @@ const get_missed_work_shops_registrations = async()=>{
 }
 
 pusher.connection.bind('connected', ()=>{
-  if (userAuthStore.superUserData.workshops.length > 0){
+  if (userAuthStore.fetchedDataLoaded){
     get_missed_work_shops_registrations()
   }
 })

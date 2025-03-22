@@ -67,12 +67,7 @@ const get_missed_work_shops_updates = async()=>{
     formData.append('type', 'fetchMissedWorkShopUpdates')
     const response = await axiosInstance.post('student/data', formData)
     const data:StudentWorkShop[] = response.data
-    data.forEach(item=>{
-      const existingWorkshopIndex = userAuthStore.StudentData.workshops.findIndex(subItem=> subItem.id === item.id)
-      if (existingWorkshopIndex !== -1){
-        userAuthStore.StudentData.workshops[existingWorkshopIndex] = item
-      }
-    })
+    userAuthStore.StudentData.workshops = data
   }
   catch{
     return Promise.reject()
@@ -80,7 +75,7 @@ const get_missed_work_shops_updates = async()=>{
 }
 
 pusher.connection.bind('connected', ()=>{
-  if (userAuthStore.StudentData.workshops.length > 0){
+  if (userAuthStore.fetchedDataLoaded){
     get_missed_work_shops_updates()
   }
 })
