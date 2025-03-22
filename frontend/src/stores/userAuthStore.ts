@@ -98,7 +98,7 @@ export const useUserAuthStore = defineStore('userAuthStore', {
       }
       catch (e) {
         elementsStore.HideLoadingOverlay()
-        elementsStore.ShowOverlay('An error occurred while logging out', 'error')
+        elementsStore.ShowOverlay('An error occurred while logging out', 'red')
         return Promise.reject(e)
       }
     },

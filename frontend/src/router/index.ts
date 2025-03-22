@@ -69,36 +69,6 @@ const checkSuperuser = async (to: any, from: any, next: NavigationGuardNext) => 
   next()
 }
 
-const checkLogin = async (to: any, from: any, next: NavigationGuardNext) => {
-  const userAuthStore = useUserAuthStore()
-  try {
-    await checkAuth()
-  }
-  catch {
-    next()
-    return;
-  }
-
-  if (userAuthStore.isAuthenticated){
-    if (userAuthStore.userData?.['role']?.toLowerCase() === 'student') {
-      if (!userAuthStore.fetchedDataLoaded){
-        userAuthStore.getStudentData()
-      }
-
-      return next('/student')
-    }
-    else if (userAuthStore.userData?.['role']?.toLowerCase() === 'superuser') {
-      if (!userAuthStore.fetchedDataLoaded){
-        userAuthStore.getSuperUserData()
-      }
-  
-      return next('/admin')
-    }
-  }
-
-  next()
-}
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -106,9 +76,6 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: ()=> import('@/views/LoginView.vue'),
-      beforeEnter: async (to, from, next) => {
-        await checkLogin(to, from, next)
-      },
     },
     {
       path: '/admin',
