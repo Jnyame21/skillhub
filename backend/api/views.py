@@ -12,6 +12,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import send_mail
 from email.utils import formataddr
 from django.db import transaction
@@ -96,6 +97,26 @@ class CookieTokenRefreshView(TokenRefreshView):
         return response
 
 
+# Logout
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_user(request):
+    refresh_token = request.COOKIES.get('refresh_token')
+    if not refresh_token:
+        return Response({'message': 'Missing refresh token'}, status=401)
+    
+    try:
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+    except Exception as e:
+        print(e)
+        return Response({'message': 'Invalid refresh token'}, status=400)
+    
+    response = Response(status=200)
+    response.delete_cookie("refresh_token", path="/")
+    return response
+
+
 # Students signup
 @api_view(['POST'])
 def student_signup(request):
@@ -143,19 +164,6 @@ def student_signup(request):
         except Exception:
             transaction.set_rollback(True)
             return Response({'message': 'A network error occured, check your internet connection and try again'}, status=400)
-
-
-# Logout
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def logout_user(request):
-    refresh_token = request.COOKIES.get('refresh_token')
-    if not refresh_token:
-        return Response({'message': 'Missing refresh token'}, status=401)
-    
-    response = Response(status=204)
-    response.delete_cookie("refresh_token", path="/")
-    return response
 
 
 # User Data
