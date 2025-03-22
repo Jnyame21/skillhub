@@ -62,7 +62,7 @@ class UserAuthView(TokenObtainPairView):
                 httponly=True,
                 expires = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
                 secure=settings.DEBUG is False,
-                samesite="Lax",
+                samesite="Lax" if settings.DEBUG else "None",
                 path="/",
             )
             del response.data['refresh']
@@ -88,7 +88,7 @@ class CookieTokenRefreshView(TokenRefreshView):
                 value=new_refresh_token,
                 httponly=True,
                 secure=settings.DEBUG is False,
-                samesite="Lax",
+                samesite="Lax" if settings.DEBUG else "None",
                 path="/",
                 expires = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
             )
