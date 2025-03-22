@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useUserAuthStore } from '@/stores/userAuthStore'
 import { useElementsStore } from '@/stores/elementsStore'
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useHead } from '@vueuse/head';
 import TheHeader from '@/components/TheHeader.vue';
 import TheFooter from '@/components/TheFooter.vue';
@@ -19,6 +19,12 @@ useHead({
 const userAuthStore = useUserAuthStore()
 const elementsStore = useElementsStore()
 
+onMounted(()=>{
+  if (!userAuthStore.userData['last_login']){
+    showOverlay('StudentWelcomeOverlay')
+  }
+})
+
 watch(() => userAuthStore.userData, () => {
   const previousActivePage = localStorage.getItem('activePage')
   if (previousActivePage) {
@@ -31,6 +37,13 @@ watch(() => userAuthStore.userData, () => {
     localStorage.setItem('activePage', activePage.value)
   }
 }, { 'once': true, 'immediate': true })
+
+const showOverlay = (element:string) => {
+  const overlay = document.getElementById(element)
+  if (overlay) {
+    overlay.style.display = 'flex'
+  }
+}
 
 const hidOverlay = (element:string) => {
   const overlay = document.getElementById(element)

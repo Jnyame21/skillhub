@@ -50,7 +50,7 @@ const createWorkShop = async () => {
   try {
     const response = await axiosInstance.post('superuser/data', formData)
     const data: SuperUserWorkShop = response.data
-    userAuthStore.superUserData.workshops[data.id.toString()] = data
+    userAuthStore.superUserData.workshops.unshift(data)
     workShopDate.value = ''
     workShopDescription.value = ''
     workShopEndTime.value = ''

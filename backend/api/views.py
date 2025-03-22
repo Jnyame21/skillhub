@@ -195,10 +195,9 @@ def get_user_data(request):
 def superuser_data(request):
     if request.method == 'GET':
         workshops = SuperuserWorkshopSerializer(Workshop.objects.prefetch_related('students').all().order_by('-id'), many=True).data
-        workshops_dict = {f"{workshop['id']}": workshop for workshop in workshops}
         
         return Response({
-            'workshops': workshops_dict,
+            'workshops': workshops,
         }, status=200)
 
     elif request.method == 'POST':

@@ -17,14 +17,17 @@ const updateType = ref('')
 const new_value = ref<string | number>('')
 
 interface Props {
-  workshopId: string;
+  workshopId: number;
 }
 
 const props = defineProps<Props>()
 const workshopId = props.workshopId
 
 const workShop = computed(() => {
-  return userAuthStore.superUserData.workshops[workshopId]
+  return userAuthStore.superUserData.workshops.find(item=> item.id === workshopId)
+})
+const workShopIndex = computed(() => {
+  return userAuthStore.superUserData.workshops.findIndex(item=> item.id === workshopId)
 })
 
 onMounted(()=>{
@@ -37,13 +40,30 @@ const initializePusherChannels = ()=>{
     if (!pusher.allChannels().some(channel=> channel.name === channel_name)){
       const channel = pusher.subscribe(channel_name);
       channel.bind('new_registration', (data: WorkShopStudent)=>{
-        userAuthStore.superUserData.workshops[workshopId].students.unshift(data)
+        const studentItemIndex = userAuthStore.superUserData.workshops[workShopIndex.value].students.findIndex(item=> item.id === data.id)
+        if (studentItemIndex === -1){
+          userAuthStore.superUserData.workshops[workShopIndex.value].students.unshift(data)
+        }
+        // const workshopItemIndex = userAuthStore.superUserData.workshops.findIndex(item=> item.id === workshopId)
+        // if (workshopItemIndex !== -1){
+        //   const studentItemIndex = userAuthStore.superUserData.workshops[workshopItemIndex].students.findIndex(item=> item.id === data.id)
+        //   if (studentItemIndex === -1){
+        //     userAuthStore.superUserData.workshops[workshopItemIndex].students.unshift(data)
+        //   }
+        // }
       })
       channel.bind('cancel_registration', (data: number)=>{
-        const studentIndex = userAuthStore.superUserData.workshops[workshopId].students.findIndex(item=> item.id === data)
-        if (studentIndex !== -1){
-          userAuthStore.superUserData.workshops[workshopId].students.splice(studentIndex, 1)
+        const studentItemIndex = userAuthStore.superUserData.workshops[workShopIndex.value].students.findIndex(item=> item.id === data)
+        if (studentItemIndex !== -1){
+          userAuthStore.superUserData.workshops[workShopIndex.value].students.splice(studentItemIndex, 1)
         }
+        // const workshopItemIndex = userAuthStore.superUserData.workshops.findIndex(item=> item.id === workshopId)
+        // if (workshopItemIndex !== -1){
+        //   const studentItemIndex = userAuthStore.superUserData.workshops[workshopItemIndex].students.findIndex(item=> item.id === data)
+        //   if (studentItemIndex !== -1){
+        //     userAuthStore.superUserData.workshops[workshopItemIndex].students.splice(studentItemIndex, 1)
+        //   }
+        // }
       })
     }
   }
@@ -57,10 +77,17 @@ const get_missed_work_shops_registrations = async()=>{
     const data:SuperUserWorkShop[] = response.data
     data.forEach(item=>{
       item.students.forEach(student=>{
-        const existingStudentIndex = userAuthStore.superUserData.workshops[workshopId].students.findIndex(subItemTwo=> subItemTwo.id === student.id)
+        const existingStudentIndex = userAuthStore.superUserData.workshops[workShopIndex.value].students.findIndex(studentItem=> studentItem.id === student.id)
         if (existingStudentIndex === -1){
-          userAuthStore.superUserData.workshops[workshopId].students.unshift(student)
+          userAuthStore.superUserData.workshops[workShopIndex.value].students.unshift(student)
         }
+        // const workshopItemIndex = userAuthStore.superUserData.workshops.findIndex(workshopItem=> workshopItem.id === workshopId)
+        // if (workshopItemIndex !== -1){
+        //   const existingStudentIndex = userAuthStore.superUserData.workshops[workshopItemIndex].students.findIndex(studentItem=> studentItem.id === student.id)
+        //   if (existingStudentIndex === -1){
+        //     userAuthStore.superUserData.workshops[workshopItemIndex].students.unshift(student)
+        //   }
+        // }
       })
     })
   }
@@ -70,7 +97,7 @@ const get_missed_work_shops_registrations = async()=>{
 }
 
 pusher.connection.bind('connected', ()=>{
-  if (Object.keys(userAuthStore.superUserData.workshops).length > 0){
+  if (userAuthStore.superUserData.workshops.length > 0){
     get_missed_work_shops_registrations()
   }
 })
@@ -81,19 +108,19 @@ const updateWorkShop = async () => {
   formData.append('newValue', new_value.value.toString())
   formData.append('workshopId', workshopId.toString())
   
-  if (updateType.value === 'start_time' && parseTime(new_value.value?.toString()) > parseTime(workShop.value.end_time)) {
+  if (updateType.value === 'start_time' && parseTime(new_value.value?.toString()) > parseTime(workShop.value?.end_time || '')) {
     elementsStore.ShowOverlay('Start time must be before the end time.', 'red');
     return;
   } 
 
-  if (updateType.value === 'end_time' && parseTime(new_value.value?.toString()) < parseTime(workShop.value.start_time)) {
+  if (updateType.value === 'end_time' && parseTime(new_value.value?.toString()) < parseTime(workShop.value?.start_time || '')) {
     elementsStore.ShowOverlay('End time must be after the start time.', 'red');
     return;
   }
 
   const newDate = Date.parse(new_value.value?.toString() || "");
-  const workshopDate = Date.parse(workShop.value.date);
-  const deadlineDate = Date.parse(workShop.value.deadline);
+  const workshopDate = Date.parse(workShop.value?.date || '');
+  const deadlineDate = Date.parse(workShop.value?.deadline || '');
 
   if (updateType.value === 'date' && newDate < deadlineDate) {
     elementsStore.ShowOverlay('Workshop date must be on or after the registration deadline.', 'red');
@@ -105,7 +132,7 @@ const updateWorkShop = async () => {
     return;
   }
 
-  if (updateType.value === 'max_participants' && (new_value.value as number) < workShop.value.students.length) {
+  if (workShop.value && updateType.value === 'max_participants' && (new_value.value as number) < workShop.value.students.length) {
     elementsStore.ShowOverlay('The maximum number of participants must be at least equal to the current number of registered students.', 'red');
     return;
   }
@@ -114,30 +141,31 @@ const updateWorkShop = async () => {
   try {
     await axiosInstance.post('superuser/data', formData)
     if (updateType.value === 'title'){
-      userAuthStore.superUserData.workshops[workshopId].title = new_value.value as string
+      userAuthStore.superUserData.workshops[workShopIndex.value].title = new_value.value as string
     }
     else if (updateType.value === 'description'){
-      userAuthStore.superUserData.workshops[workshopId].description = new_value.value as string
+      userAuthStore.superUserData.workshops[workShopIndex.value].description = new_value.value as string
     }
     else if (updateType.value === 'start_time'){
-      userAuthStore.superUserData.workshops[workshopId].start_time = new_value.value as string
+      userAuthStore.superUserData.workshops[workShopIndex.value].start_time = new_value.value as string
     }
     else if (updateType.value === 'end_time'){
-      userAuthStore.superUserData.workshops[workshopId].end_time = new_value.value as string
+      userAuthStore.superUserData.workshops[workShopIndex.value].end_time = new_value.value as string
     }
     else if (updateType.value === 'date'){
-      userAuthStore.superUserData.workshops[workshopId].date = new_value.value as string
+      userAuthStore.superUserData.workshops[workShopIndex.value].date = new_value.value as string
       initializePusherChannels()
     }
     else if (updateType.value === 'deadline'){
-      userAuthStore.superUserData.workshops[workshopId].deadline = new_value.value as string
+      userAuthStore.superUserData.workshops[workShopIndex.value].deadline = new_value.value as string
     }
     else if (updateType.value === 'location'){
-      userAuthStore.superUserData.workshops[workshopId].location = new_value.value as string
+      userAuthStore.superUserData.workshops[workShopIndex.value].location = new_value.value as string
     }
     else if (updateType.value === 'max_participants'){
-      userAuthStore.superUserData.workshops[workshopId].max_participants = new_value.value as number
+      userAuthStore.superUserData.workshops[workShopIndex.value].max_participants = new_value.value as number
     }
+    
     updateType.value = ''
     new_value.value = ''
     closeOverlay(`SuperUserWorkShopUpdateOverlay${workshopId}`)
@@ -171,7 +199,7 @@ const deleteWorkShop = async () => {
   elementsStore.ShowLoadingOverlay()
   try {
     await axiosInstance.post('superuser/data', formData)
-    delete userAuthStore.superUserData.workshops[workshopId]
+    userAuthStore.superUserData.workshops.splice(workShopIndex.value, 1)
     const pageName = 'SuperUserCreateWorkShop'
     elementsStore.activePage = pageName
     localStorage.setItem('activePage', pageName)
@@ -226,8 +254,7 @@ const closeOverlay = (element: string) => {
         <v-btn @click="closeOverlay(`SuperUserWorkShopPropertiesViewOverlay${workshopId}`)" color="red" size="small" class="close-btn" variant="flat">
           X
         </v-btn>
-        <div class="overlay-card-info-container"></div>
-        <div class="overlay-card-content-container">
+        <div class="overlay-card-content-container" style="margin-top: 3em;">
           <v-card-text>{{workShopDescription}}</v-card-text>
         </div> 
         <div class="overlay-card-action-btn-container"></div>
@@ -301,7 +328,7 @@ const closeOverlay = (element: string) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(_student_, index) in workShop.students.sort((a, b)=> b.id - a.id)" :key="index">
+        <tr v-for="_student_ in workShop.students.sort((a, b)=> b.id - a.id)" :key="_student_.id">
           <td class="table-data">{{ _student_.name }}</td>
           <td class="table-data">{{ _student_.gender }}</td>
           <td class="table-data">{{ _student_.school }}</td>

@@ -44,8 +44,8 @@ onBeforeMount(() => {
       <div class="component-wrapper" :class="{ 'is-active-component': elementsStore.activePage === 'SuperUserCreateWorkShop' }">
         <SuperUserCreateWorkShop />
       </div>
-      <div class="component-wrapper" v-for="workshop_id in Object.keys( userAuthStore.superUserData.workshops)" :key="workshop_id" :class="{ 'is-active-component': elementsStore.activePage === `SuperUserWorkShop,${workshop_id}` }">
-        <SuperUserWorkShops :workshopId="workshop_id" />
+      <div class="component-wrapper" v-for="(workshop, index) in userAuthStore.superUserData.workshops" :key="workshop.id" :class="{ 'is-active-component': elementsStore.activePage === `SuperUserWorkShop,${workshop.id}` }" >
+        <SuperUserWorkShops :workshopId="workshop.id" />
       </div>
     </div>
   </main>

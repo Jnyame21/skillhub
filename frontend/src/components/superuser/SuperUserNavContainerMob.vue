@@ -31,9 +31,9 @@ const showOverlay = () => {
             WORKSHOPS
           </v-list-item>
         </template>
-        <v-list-item class="nav-title nav-link" v-for="[workshop_id, value] in Object.entries(userAuthStore.superUserData.workshops)"
-          :key="workshop_id" @click="changePage(`SuperUserWorkShop,${workshop_id}`)">
-          {{ value.title }}
+        <v-list-item class="nav-title nav-link" v-for="workshop in userAuthStore.superUserData.workshops"
+          :key="workshop.id" @click="changePage(`SuperUserWorkShop,${workshop.id}`)">
+          {{ workshop.title }}
         </v-list-item>
       </v-list-group>
 

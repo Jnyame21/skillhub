@@ -49,7 +49,7 @@ export interface states {
   currentDate: string;
   currentYearEndDate: string;
   superUserData: {
-    workshops: {[key: string]: SuperUserWorkShop};
+    workshops: SuperUserWorkShop[];
   };
   StudentData: {
     workshops: StudentWorkShop[];
@@ -70,7 +70,7 @@ export const useUserAuthStore = defineStore('userAuthStore', {
       currentYearStartDate: '',
       currentYearEndDate: '',
       superUserData: {
-        workshops: {},
+        workshops: [],
       },
       StudentData: {
         workshops: [],

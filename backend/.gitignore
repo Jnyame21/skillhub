@@ -1,0 +1,17 @@
+# Byte-compiled / cached files
+__pycache__/
+
+# Django-specific files
+*.log
+
+# Environment variables and credentials
+.env
+
+# IDE and editor-specific files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Migrations (optional, if you regenerate them often)
+**/migrations/*.py
+!**/migrations/__init__.py

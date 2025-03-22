@@ -176,8 +176,7 @@ const hidOverlay = (element: string) => {
         <v-btn @click="hidOverlay('StudentWorkShopPropertiesViewOverlay')" color="red" size="small" class="close-btn" variant="flat">
           X
         </v-btn>
-        <div class="overlay-card-info-container"></div>
-        <div class="overlay-card-content-container">
+        <div class="overlay-card-content-container" style="margin-top: 3em;">
           <v-card-text>{{registrationDescription}}</v-card-text>
         </div> 
         <div class="overlay-card-action-btn-container"></div>
